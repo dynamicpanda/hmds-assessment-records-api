@@ -6,6 +6,7 @@ package com.hmds.assessment;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,13 +29,18 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public class WebServiceTest {
 
-	// the mock model/view/controller with which to run the web service
+	/** The mock model/view/controller with which to run the web service */
 	@Autowired
 	private MockMvc mockMvc;
 
+	/** The name of the configuration file containing messages */
+	private String messagesFile = "messages.properties";
+
 	/**
-	 * Test that a greeting message properly returns the correct greeting.
-	 * @throws Exception
+	 * Test that a greeting message request properly returns the correct
+	 * greeting.
+	 * 
+	 * @throws Exception Thrown if an exception occurs while running the test.
 	 */
 	@Test
 	public void shouldReturnGreetingMessage() throws Exception {
@@ -42,15 +49,91 @@ public class WebServiceTest {
 
 		// retrieve the expected message from the properties file
 		Properties messages = new Properties();
-    	messages.load(WebService.class.getClassLoader().getResourceAsStream("messages.properties"));
+    	messages.load(WebService.class.getClassLoader().getResourceAsStream(this.messagesFile));
 		String expectedMessage = messages.getProperty(TYPE);
 
 		// call the service and assert that it responds ok with the correct
 		// message
-		this.mockMvc.perform(get("/message/greeting"))
+		this.mockMvc.perform(get("/message/" + TYPE))
             .andDo(print())
             .andExpect(status().isOk())
 			.andExpect(jsonPath("$.type", is(TYPE)))
-			.andExpect(jsonPath("$.value", is(expectedMessage)));
+			.andExpect(jsonPath("$.value", is(expectedMessage)))
+			.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+	}
+
+	/**
+	 * Test that an advice message request properly returns the correct advice.
+	 * 
+	 * @throws Exception Thrown if an exception occurs while running the test.
+	 */
+	@Test
+	public void shouldReturnAdviceMessage() throws Exception {
+
+		final String TYPE = "advice";
+
+		// retrieve the expected message from the properties file
+		Properties messages = new Properties();
+    	messages.load(WebService.class.getClassLoader().getResourceAsStream(this.messagesFile));
+		String expectedMessage = messages.getProperty(TYPE);
+
+		// call the service and assert that it responds ok with the correct
+		// message
+		this.mockMvc.perform(get("/message/" + TYPE))
+            .andDo(print())
+            .andExpect(status().isOk())
+			.andExpect(jsonPath("$.type", is(TYPE)))
+			.andExpect(jsonPath("$.value", is(expectedMessage)))
+			.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+	}
+
+	/**
+	 * Test that a quote message request properly returns the correct quote.
+	 * 
+	 * @throws Exception Thrown if an exception occurs while running the test.
+	 */
+	@Test
+	public void shouldReturnQuoteMessage() throws Exception {
+
+		final String TYPE = "quote";
+
+		// retrieve the expected message from the properties file
+		Properties messages = new Properties();
+    	messages.load(WebService.class.getClassLoader().getResourceAsStream(this.messagesFile));
+		String expectedMessage = messages.getProperty(TYPE);
+
+		// call the service and assert that it responds ok with the correct
+		// message
+		this.mockMvc.perform(get("/message/" + TYPE))
+            .andDo(print())
+            .andExpect(status().isOk())
+			.andExpect(jsonPath("$.type", is(TYPE)))
+			.andExpect(jsonPath("$.value", is(expectedMessage)))
+			.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+	}
+
+	/**
+	 * Test that a proverb message request properly returns the correct proverb.
+	 * 
+	 * @throws Exception Thrown if an exception occurs while running the test.
+	 */
+	@Test
+	public void shouldReturnProverbMessage() throws Exception {
+
+		final String TYPE = "proverb";
+
+		// retrieve the expected message from the properties file
+		Properties messages = new Properties();
+    	messages.load(WebService.class.getClassLoader().getResourceAsStream(this.messagesFile));
+		String expectedMessage = messages.getProperty(TYPE);
+
+		// call the service and assert that it responds ok with the correct
+		// message
+		this.mockMvc.perform(get("/message/" + TYPE))
+            .andDo(print())
+            .andExpect(status().isOk())
+			.andExpect(jsonPath("$.type", is(TYPE)))
+			.andExpect(jsonPath("$.value", is(expectedMessage)))
+			.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
 	}
 }

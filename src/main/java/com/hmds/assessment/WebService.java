@@ -6,6 +6,7 @@ import java.util.Properties;
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,7 +50,15 @@ public class WebService {
         .add("type", type)
         .add("value", message)
         .build();
-      return new ResponseEntity<String>(json.toString(), HttpStatus.OK);
+
+      // define the JSON response content type
+      HttpHeaders responseHeaders = new HttpHeaders();
+      responseHeaders.set("Content-Type", "application/json");
+
+      // return the successful response
+      return ResponseEntity.ok()
+        .headers(responseHeaders)
+        .body(json.toString());
     }
     // if type invalid, return 400
     else {
