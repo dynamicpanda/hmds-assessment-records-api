@@ -28,9 +28,9 @@ public class WebServiceTest {
 
 	@Test
 	public void shouldReturnDefaultMessage() throws Exception {
-		this.mockMvc.perform(get("/hello").param("message", "Hello, World"))
+		this.mockMvc.perform(get("/message/greeting"))
             .andDo(print())
             .andExpect(status().isOk())
-			.andExpect(content().string(containsString("Hello, World")));
+			.andExpect(content().string(containsString("Hello, World!")));
 	}
 }
