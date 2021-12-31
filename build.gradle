@@ -22,10 +22,11 @@ dependencies {
     // Use JUnit test framework.
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:30.1.1-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'javax.json:javax.json-api:1.0'
+    implementation 'org.glassfish:javax.json:1.1'
 }
 
 application {
