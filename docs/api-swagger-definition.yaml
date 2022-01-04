@@ -1,0 +1,87 @@
+swagger: "2.0"
+info:
+  description: "This is an API used to interact with records on a system. The API is used as a coding assessment for the Senior Application Developer position. Records are retrieved and managed with unique ID numbers."
+  version: "1.0.0"
+  title: "HMDS Senior Assessment - Records API"
+basePath: "/"
+tags:
+- name: "record"
+  description: "Access various records on the system."
+schemes:
+- "http"
+paths:
+  /record/{id}:
+    get:
+      tags:
+      - "record"
+      summary: "Retrieve a record by ID"
+      description: "Returns the record data (JSON) for a record on the system based on the record ID number provided in the request."
+      operationId: "getRecordById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of the record to retrieve"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/RecordData"
+        "404":
+          description: "Not found"
+    delete:
+      tags:
+      - "record"
+      summary: "Delete a record by ID"
+      description: "Deletes the record with the ID provided."
+      operationId: "deleteRecordById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of the record to retrieve"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Successful operation"
+        "404":
+          description: "Not found"
+  /record:
+    put:
+      tags:
+      - "record"
+      summary: "Store a record"
+      description: "Stores the record data (JSON) provided in the request body and generates a unique ID for the record."
+      operationId: "putRecordData"
+      parameters:
+        - in: body
+          name: recordData
+          description: A JSON object containing any data associated with the record.
+          required: true
+          schema:
+            type: object
+      produces:
+      - "application/json"
+      responses:
+        "201":
+          description: "Successfully created"
+          schema:
+            $ref: "#/definitions/RecordID"
+        "400":
+          description: "Invalid JSON body provided"
+definitions:
+  RecordID:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "The ID pertaining to the record of message"
+  RecordData:
+    type: "object"
+    properties:
+      recordData:
+        description: "The JSON data associated with the record. Data contained inthe object varies per record."
+        type: "object"

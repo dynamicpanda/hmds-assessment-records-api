@@ -12,3 +12,6 @@ build
 
 # Ignore records folder
 records
+
+# Ignore built application
+bin

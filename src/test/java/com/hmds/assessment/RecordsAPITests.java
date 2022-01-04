@@ -38,7 +38,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class WebServiceTest {
+public class RecordsAPITests {
 
 	/** The mock model/view/controller with which to run the web service */
 	@Autowired
