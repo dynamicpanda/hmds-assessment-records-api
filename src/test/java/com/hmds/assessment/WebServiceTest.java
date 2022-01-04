@@ -3,15 +3,24 @@
  */
 package com.hmds.assessment;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Properties;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import com.jayway.jsonpath.JsonPath;
+
+import org.json.JSONObject;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +29,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 /**
- * Test class for HMDS message API framework.
+ * Test class for HMDS record API framework. Tests GET, PUT, DELETE with
+ * negative tests for bad response codes.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -33,107 +44,164 @@ public class WebServiceTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	/** The name of the configuration file containing messages */
-	private String messagesFile = "messages.properties";
+	/**
+	 * Cleans up after tests are run by removing all records in the records
+	 * folder.
+	 * 
+	 * @throws Exception Raised if any exception occurs during teardown.
+	 */
+	@AfterClass
+	public static void teardown() throws Exception {
+
+		// determine the path of the records folder based on the current folder
+		Path currentPath = Paths.get(System.getProperty("user.dir"));
+        File recordsFolder = new File(Paths.get(currentPath.toString(), "records").toString());
+
+		// delete all files in the records folder
+		for (String recordFile : recordsFolder.list()) {
+            (new File(recordFile)).delete();
+        }
+	}
 
 	/**
-	 * Test that a greeting message request properly returns the correct
-	 * greeting.
+	 * Tests that a record can be retrieved successfully by ID.
 	 * 
-	 * @throws Exception Thrown if an exception occurs while running the test.
+	 * @throws Exception Raised if the test encounters any exception.
 	 */
 	@Test
-	public void shouldReturnGreetingMessage() throws Exception {
+	public void getsRecordDataById() throws Exception {
 
-		final String TYPE = "greeting";
+		// create an empty JSON object to use as a request body
+        String requestBody = (new JSONObject("{}")).toString();
 
-		// retrieve the expected message from the properties file
-		Properties messages = new Properties();
-    	messages.load(WebService.class.getClassLoader().getResourceAsStream(this.messagesFile));
-		String expectedMessage = messages.getProperty(TYPE);
+		// create a new record to get a valid ID
+        MvcResult result = mockMvc.perform(put("/record")
+		    .content(requestBody))
+			.andExpect(status().isCreated())
+			.andReturn();
+		
+		// get the ID from the response body
+		String responseBody = result.getResponse().getContentAsString();
+		String id = new JSONObject(responseBody).getString("id");
 
 		// call the service and assert that it responds ok with the correct
-		// message
-		this.mockMvc.perform(get("/message/" + TYPE))
+		// record data
+		this.mockMvc.perform(get("/record/" + id))
             .andDo(print())
             .andExpect(status().isOk())
-			.andExpect(jsonPath("$.type", is(TYPE)))
-			.andExpect(jsonPath("$.value", is(expectedMessage)))
+			.andExpect(jsonPath("$.recordData", equalTo(JsonPath.read(requestBody, "$"))))
 			.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
 	}
 
 	/**
-	 * Test that an advice message request properly returns the correct advice.
+	 * Tests that a GET request for a missing record correctly responds with a
+	 * NOT FOUND.
 	 * 
-	 * @throws Exception Thrown if an exception occurs while running the test.
+	 * @throws Exception Raised if the test encounters any exception.
 	 */
 	@Test
-	public void shouldReturnAdviceMessage() throws Exception {
-
-		final String TYPE = "advice";
-
-		// retrieve the expected message from the properties file
-		Properties messages = new Properties();
-    	messages.load(WebService.class.getClassLoader().getResourceAsStream(this.messagesFile));
-		String expectedMessage = messages.getProperty(TYPE);
-
-		// call the service and assert that it responds ok with the correct
-		// message
-		this.mockMvc.perform(get("/message/" + TYPE))
+	public void getMissingRecordRespondsNotFound() throws Exception {
+		// call the service and assert that it responds with a not found code
+		this.mockMvc.perform(get("/record/missing"))
             .andDo(print())
-            .andExpect(status().isOk())
-			.andExpect(jsonPath("$.type", is(TYPE)))
-			.andExpect(jsonPath("$.value", is(expectedMessage)))
-			.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+            .andExpect(status().isNotFound());
 	}
 
 	/**
-	 * Test that a quote message request properly returns the correct quote.
+	 * Test that a put of an empty record is successfully created.
 	 * 
-	 * @throws Exception Thrown if an exception occurs while running the test.
+	 * @throws Exception Raised if the test encounters any exception.
 	 */
 	@Test
-	public void shouldReturnQuoteMessage() throws Exception {
+	public void createsEmptyRecordSuccessfully() throws Exception {
 
-		final String TYPE = "quote";
+        String requestBody = (new JSONObject("{}")).toString();
 
-		// retrieve the expected message from the properties file
-		Properties messages = new Properties();
-    	messages.load(WebService.class.getClassLoader().getResourceAsStream(this.messagesFile));
-		String expectedMessage = messages.getProperty(TYPE);
-
-		// call the service and assert that it responds ok with the correct
-		// message
-		this.mockMvc.perform(get("/message/" + TYPE))
-            .andDo(print())
-            .andExpect(status().isOk())
-			.andExpect(jsonPath("$.type", is(TYPE)))
-			.andExpect(jsonPath("$.value", is(expectedMessage)))
-			.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+		// call the service and assert that it response ok and contains an ID
+        mockMvc.perform(put("/record")
+		    .content(requestBody))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.id", notNullValue()));
 	}
 
 	/**
-	 * Test that a proverb message request properly returns the correct proverb.
+	 * Test that a put of a populated record is successfully created.
 	 * 
-	 * @throws Exception Thrown if an exception occurs while running the test.
+	 * @throws Exception Raised if the test encounters any exception.
 	 */
 	@Test
-	public void shouldReturnProverbMessage() throws Exception {
+	public void createsPopulatedRecordSuccessfully() throws Exception {
 
-		final String TYPE = "proverb";
+        String requestBody = (new JSONObject(
+			"{\"key1\": \"value1\", \"array1\": [\"arrayValue1\"]}"
+		)).toString();
 
-		// retrieve the expected message from the properties file
-		Properties messages = new Properties();
-    	messages.load(WebService.class.getClassLoader().getResourceAsStream(this.messagesFile));
-		String expectedMessage = messages.getProperty(TYPE);
+		// call the service and assert that it responds okay and contains an ID
+        mockMvc.perform(put("/record")
+		    .content(requestBody))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.id", notNullValue()));
+	}
 
-		// call the service and assert that it responds ok with the correct
-		// message
-		this.mockMvc.perform(get("/message/" + TYPE))
+	/**
+	 * Test that a put of a record with invalid JSON is rejected with a bad
+	 * request response.
+	 * 
+	 * @throws Exception Raised if the test encounters any exception.
+	 */
+	@Test
+	public void putRejectsInvalidJson() throws Exception {
+
+        String requestBody = "invalid";
+
+		// call the service and assert that it response with a bad request code
+        mockMvc.perform(put("/record")
+		    .content(requestBody))
+			.andExpect(status().isBadRequest());
+	}
+
+	/**
+	 * Tests that a record can be deleted successfully by ID.
+	 * 
+	 * @throws Exception Raised if the test encounters any exception.
+	 */
+	@Test
+	public void deletesRecordDataByIdSuccessfully() throws Exception {
+
+        String requestBody = (new JSONObject("{}")).toString();
+
+		// create a new record to get a valid ID to use
+        MvcResult result = mockMvc.perform(put("/record")
+		    .content(requestBody))
+			.andExpect(status().isCreated())
+			.andReturn();
+		
+		// get the ID from the response body
+		String responseBody = result.getResponse().getContentAsString();
+		String id = new JSONObject(responseBody).getString("id");
+
+		// call the service and assert that it responds ok
+		this.mockMvc.perform(delete("/record/" + id))
             .andDo(print())
-            .andExpect(status().isOk())
-			.andExpect(jsonPath("$.type", is(TYPE)))
-			.andExpect(jsonPath("$.value", is(expectedMessage)))
-			.andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE));
+            .andExpect(status().isOk());
+		
+		// assert that the record no longer exists
+		this.mockMvc.perform(get("/record/" + id))
+		   .andDo(print())
+		   .andExpect(status().isNotFound());
+	}
+
+	/**
+	 * Tests that a DELETE request for a missing record correctly responds with
+	 * a NOT FOUND.
+	 * 
+	 * @throws Exception Raised if the test encounters any exception.
+	 */
+	@Test
+	public void deleteMissingRecordRespondsNotFound() throws Exception {
+		// call the service and assert that it responds ok with not found
+		this.mockMvc.perform(get("/record/missing"))
+            .andDo(print())
+            .andExpect(status().isNotFound());
 	}
 }

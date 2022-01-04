@@ -28,6 +28,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'javax.json:javax.json-api:1.0'
     implementation 'org.glassfish:javax.json:1.1'
+    implementation group: 'org.json', name: 'json', version: '20211205'
+
 }
 
 application {
