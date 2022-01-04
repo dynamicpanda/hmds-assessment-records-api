@@ -26,13 +26,11 @@ dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:30.1.1-jre'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'javax.json:javax.json-api:1.0'
-    implementation 'org.glassfish:javax.json:1.1'
     implementation group: 'org.json', name: 'json', version: '20211205'
 
 }
 
 application {
     // Define the main class for the application.
-    mainClass = 'com.hmds.assessment.Application'
+    mainClass = 'com.hmds.assessment.ServiceRunner'
 }

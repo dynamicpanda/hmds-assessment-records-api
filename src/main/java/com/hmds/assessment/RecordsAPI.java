@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * accessing records on the system.
  */
 @RestController
-public class WebService {
+public class RecordsAPI {
 
     /**
      * Exposes GET request to retrieve a record based on a record ID provided
