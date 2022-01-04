@@ -15,3 +15,6 @@ records
 
 # Ignore built application
 bin
+
+# Ignore temporary Microsft files
+~$*
