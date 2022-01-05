@@ -32,6 +32,8 @@ The Java application is build with Gradle. To build and run the application, run
 ./gradlew bootRun
 ```
 
+***Java 11 is required***
+
 **Note**: `./gradlew clean build` also runs all defined tests.
 
 The API may then be used under the base URL `http://localhost:8080`.
